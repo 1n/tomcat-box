@@ -1,0 +1,44 @@
+{
+	"variables": {
+    "box_name": "centos65-tomcat"
+  },
+  "builders": [
+    {
+		"vm_name": "centos65-tomcat",
+    "type": "virtualbox-iso",
+	  "guest_os_type": "RedHat_64",
+	  "iso_url": "http://ftp.byfly.by/pub/CentOS/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+	  "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+	  "iso_checksum_type": "md5",
+	  "ssh_username": "vagrant",
+	  "ssh_password": "vagrant",
+	  "ssh_wait_timeout": "3600s",
+		"disk_size": 8192,
+		"http_directory": "http",
+		"boot_command": [
+      "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort}}/ks.cfg<enter>"
+    ],
+	  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
+		"guest_additions_path": "VBoxGuestAdditions.iso",
+    "virtualbox_version_file": ".vbox_version",
+		"vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "2048"],
+      ["modifyvm", "{{.Name}}", "--cpus", "2"]
+    ]
+    }
+  ],
+	"provisioners": [
+		{
+		"type": "shell",
+	  "script": "script/tomcat-install.sh"
+		}
+  ],
+	"post-processors": [
+		{
+	  "type": "vagrant",
+		"compression_level": 6,
+		"keep_input_artifact": true,
+		"output": "boxes/{{.Provider}}/{{user `box_name`}}.box"
+		}
+	]
+}
